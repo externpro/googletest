@@ -86,24 +86,51 @@ config_compiler_and_linker()  # Defined in internal_utils.cmake.
 # alias libraries.
 set(cmake_package_name GTest CACHE INTERNAL "")
 
+function(callPackageDevel)
+  set(libs gtest gtest_main)
+  if(BUILD_GMOCK)
+    list(APPEND libs gmock gmock_main)
+  endif()
+  list(TRANSFORM libs PREPEND "${XP_NAMESPACE}::")
+  set(CMAKE_PROJECT_NAME googletest)
+  set(CPACK_PACKAGE_NAME googletest)
+  string(JOIN "\n" EXT1
+    "set(THREAD_PREFER_PTHREAD_FLAG ON)"
+    "find_package(Threads REQUIRED) # depends on Threads::Threads"
+    ""
+    )
+  xpPackageDevel(TARGETS_FILE ${targets_export_name} LIBRARIES ${libs})
+endfunction()
+
 # Create the CMake package file descriptors.
 if (INSTALL_GTEST)
   include(CMakePackageConfigHelpers)
   set(targets_export_name ${cmake_package_name}Targets CACHE INTERNAL "")
   set(generated_dir "${CMAKE_CURRENT_BINARY_DIR}/generated" CACHE INTERNAL "")
+  if(DEFINED XP_INSTALL_CMAKEDIR)
+    set(XP_COMPONENT devel)
+    set(XP_NAMESPACE xpro)
+    callPackageDevel()
+    set(cmake_files_install_dir "${XP_INSTALL_CMAKEDIR}")
+  else()
+  set(XP_COMPONENT ${PROJECT_NAME})
+  set(XP_NAMESPACE ${cmake_package_name})
   set(cmake_files_install_dir "${CMAKE_INSTALL_LIBDIR}/cmake/${cmake_package_name}")
   set(version_file "${generated_dir}/${cmake_package_name}ConfigVersion.cmake")
   write_basic_package_version_file(${version_file} VERSION ${GOOGLETEST_VERSION} COMPATIBILITY AnyNewerVersion)
+  endif() # XP_INSTALL_CMAKEDIR
   install(EXPORT ${targets_export_name}
-    COMPONENT "${PROJECT_NAME}"
-    NAMESPACE ${cmake_package_name}::
+    COMPONENT "${XP_COMPONENT}"
+    NAMESPACE ${XP_NAMESPACE}::
     DESTINATION ${cmake_files_install_dir})
+  if(NOT DEFINED XP_INSTALL_CMAKEDIR)
   set(config_file "${generated_dir}/${cmake_package_name}Config.cmake")
   configure_package_config_file("${gtest_SOURCE_DIR}/cmake/Config.cmake.in"
     "${config_file}" INSTALL_DESTINATION ${cmake_files_install_dir})
   install(FILES ${version_file} ${config_file}
     COMPONENT "${PROJECT_NAME}"
     DESTINATION ${cmake_files_install_dir})
+  endif() # XP_INSTALL_CMAKEDIR
 endif()
 
 # Where Google Test's .h files can be found.
