@@ -3,8 +3,7 @@
 
 cmake_minimum_required(VERSION 3.13...3.31)
 
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/.devcontainer/cmake)
-include(preproject)
+set(CMAKE_PROJECT_TOP_LEVEL_INCLUDES ".devcontainer/cmake/xproinc.cmake")
 project(googletest-distribution)
 set(GOOGLETEST_VERSION 1.16.0)
 
@@ -16,7 +15,6 @@ enable_testing()
 
 include(CMakeDependentOption)
 include(GNUInstallDirs)
-include(flags)
 
 # Note that googlemock target already builds googletest.
 option(BUILD_GMOCK "Builds the googlemock subproject" ON)

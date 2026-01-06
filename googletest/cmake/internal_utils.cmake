@@ -298,22 +298,17 @@ endfunction()
 # Installs the specified targets and configures the associated pkgconfig files.
 function(install_project)
   if(INSTALL_GTEST)
-    if(DEFINED XP_INSTALL_CMAKEDIR)
-      set(XP_COMPONENT devel)
-    else()
-      set(XP_COMPONENT ${PROJECT_NAME})
-    endif() # XP_INSTALL_CMAKEDIR
     install(DIRECTORY "${PROJECT_SOURCE_DIR}/include/"
-      COMPONENT "${XP_COMPONENT}"
+      COMPONENT "${PROJECT_NAME}"
       DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
     # Install the project targets.
     install(TARGETS ${ARGN}
       EXPORT ${targets_export_name}
-      COMPONENT "${XP_COMPONENT}"
+      COMPONENT "${PROJECT_NAME}"
       RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
       ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
       LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}")
-    if(NOT DEFINED XP_INSTALL_CMAKEDIR)
+    if(NOT DEFINED XP_NAMESPACE)
     if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
       # Install PDBs.
       foreach(t ${ARGN})
@@ -336,6 +331,6 @@ function(install_project)
         COMPONENT "${PROJECT_NAME}"
         DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
     endforeach()
-    endif() # XP_INSTALL_CMAKEDIR
+    endif() # XP_NAMESPACE
   endif()
 endfunction()
