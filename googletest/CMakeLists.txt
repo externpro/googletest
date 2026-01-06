@@ -86,39 +86,32 @@ config_compiler_and_linker()  # Defined in internal_utils.cmake.
 # alias libraries.
 set(cmake_package_name GTest CACHE INTERNAL "")
 
-function(callPackageDevel)
-  set(libs gtest gtest_main)
-  if(BUILD_GMOCK)
-    list(APPEND libs gmock gmock_main)
-  endif()
-  list(TRANSFORM libs PREPEND "${XP_NAMESPACE}::")
-  set(CMAKE_PROJECT_NAME googletest)
-  set(CPACK_PACKAGE_NAME googletest)
-  string(JOIN "\n" EXT1
-    "set(THREAD_PREFER_PTHREAD_FLAG ON)"
-    "find_package(Threads REQUIRED) # depends on Threads::Threads"
-    ""
-    )
-  xpPackageDevel(TARGETS_FILE ${targets_export_name} LIBRARIES ${libs})
-endfunction()
-
 # Create the CMake package file descriptors.
 if (INSTALL_GTEST)
   include(CMakePackageConfigHelpers)
   set(targets_export_name ${cmake_package_name}Targets CACHE INTERNAL "")
   set(generated_dir "${CMAKE_CURRENT_BINARY_DIR}/generated" CACHE INTERNAL "")
-  if(DEFINED XP_INSTALL_CMAKEDIR)
-    set(XP_COMPONENT devel)
-    set(XP_NAMESPACE xpro)
-    callPackageDevel()
-    set(cmake_files_install_dir "${XP_INSTALL_CMAKEDIR}")
+  if(DEFINED XP_NAMESPACE)
+    set(libs gtest gtest_main)
+    if(BUILD_GMOCK)
+      list(APPEND libs gmock gmock_main)
+    endif()
+    xpExternPackage(REPO_NAME googletest
+      NAMESPACE ${XP_NAMESPACE} ALIAS_NAMESPACE ${cmake_package_name}
+      TARGETS_FILE ${targets_export_name} LIBRARIES ${libs}
+      BASE v${GOOGLETEST_VERSION} XPDIFF "patch" FIND_THREADS
+      WEB "https://google.github.io/googletest/" UPSTREAM "github.com/google/googletest"
+      DESC "GoogleTest - Google Testing and Mocking Framework"
+      LICENSE "[BSD-3-Clause](https://github.com/google/googletest/blob/master/LICENSE 'BSD 3-Clause New or Revised License')"
+      )
     set(CMAKE_NAMESPACE ${XP_NAMESPACE})
+    set(cmake_files_install_dir "${XP_INSTALL_CMAKEDIR}")
   else()
   set(CMAKE_NAMESPACE ${cmake_package_name})
   set(cmake_files_install_dir "${CMAKE_INSTALL_LIBDIR}/cmake/${cmake_package_name}")
   set(version_file "${generated_dir}/${cmake_package_name}ConfigVersion.cmake")
   write_basic_package_version_file(${version_file} VERSION ${GOOGLETEST_VERSION} COMPATIBILITY AnyNewerVersion)
-  endif() # XP_INSTALL_CMAKEDIR
+  endif() # XP_NAMESPACE
   install(EXPORT ${targets_export_name}
     COMPONENT "${PROJECT_NAME}"
     NAMESPACE ${CMAKE_NAMESPACE}::
