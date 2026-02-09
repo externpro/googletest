@@ -105,7 +105,7 @@ if (INSTALL_GTEST)
       LICENSE "[BSD-3-Clause](https://github.com/google/googletest/blob/master/LICENSE 'BSD 3-Clause New or Revised License')"
       )
     set(CMAKE_NAMESPACE ${XP_NAMESPACE})
-    set(cmake_files_install_dir "${XP_INSTALL_CMAKEDIR}")
+    set(cmake_files_install_dir "${CMAKE_INSTALL_CMAKEDIR}")
   else()
   set(CMAKE_NAMESPACE ${cmake_package_name})
   set(cmake_files_install_dir "${CMAKE_INSTALL_LIBDIR}/cmake/${cmake_package_name}")
