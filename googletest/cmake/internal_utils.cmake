@@ -308,7 +308,7 @@ function(install_project)
       RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
       ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
       LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}")
-    if(NOT DEFINED XP_NAMESPACE)
+    if(CMAKE_OPT_INSTALL)
     if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
       # Install PDBs.
       foreach(t ${ARGN})
@@ -331,6 +331,6 @@ function(install_project)
         COMPONENT "${PROJECT_NAME}"
         DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
     endforeach()
-    endif() # XP_NAMESPACE
+    endif() # CMAKE_OPT_INSTALL
   endif()
 endfunction()
