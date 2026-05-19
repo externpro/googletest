@@ -91,39 +91,27 @@ if (INSTALL_GTEST)
   include(CMakePackageConfigHelpers)
   set(targets_export_name ${cmake_package_name}Targets CACHE INTERNAL "")
   set(generated_dir "${CMAKE_CURRENT_BINARY_DIR}/generated" CACHE INTERNAL "")
-  if(DEFINED XP_NAMESPACE)
-    set(libs gtest gtest_main)
-    if(BUILD_GMOCK)
-      list(APPEND libs gmock gmock_main)
-    endif()
-    xpExternPackage(REPO_NAME googletest
-      NAMESPACE ${XP_NAMESPACE} ALIAS_NAMESPACE ${cmake_package_name}
-      TARGETS_FILE ${targets_export_name} LIBRARIES ${libs}
-      BASE v${GOOGLETEST_VERSION} XPDIFF "patch" FIND_THREADS
-      WEB "https://google.github.io/googletest/" UPSTREAM "github.com/google/googletest"
-      DESC "GoogleTest - Google Testing and Mocking Framework"
-      LICENSE "[BSD-3-Clause](https://github.com/google/googletest/blob/master/LICENSE 'BSD 3-Clause New or Revised License')"
-      )
-    set(CMAKE_NAMESPACE ${XP_NAMESPACE})
-    set(cmake_files_install_dir "${CMAKE_INSTALL_CMAKEDIR}")
+  if(COMMAND xpExternPackage)
+    set(cmake_files_install_dir "${CMAKE_INSTALL_DATADIR}/cmake")
+    set(CMAKE_OPT_INSTALL FALSE)
   else()
-  set(CMAKE_NAMESPACE ${cmake_package_name})
+  set(CMAKE_OPT_INSTALL TRUE)
   set(cmake_files_install_dir "${CMAKE_INSTALL_LIBDIR}/cmake/${cmake_package_name}")
   set(version_file "${generated_dir}/${cmake_package_name}ConfigVersion.cmake")
   write_basic_package_version_file(${version_file} VERSION ${GOOGLETEST_VERSION} COMPATIBILITY AnyNewerVersion)
-  endif() # XP_NAMESPACE
+  endif() # COMMAND xpExternPackage
   install(EXPORT ${targets_export_name}
     COMPONENT "${PROJECT_NAME}"
-    NAMESPACE ${CMAKE_NAMESPACE}::
+    NAMESPACE googletest:: # TRICKY: match REPO_NAME
     DESTINATION ${cmake_files_install_dir})
-  if(NOT DEFINED XP_NAMESPACE)
+  if(CMAKE_OPT_INSTALL)
   set(config_file "${generated_dir}/${cmake_package_name}Config.cmake")
   configure_package_config_file("${gtest_SOURCE_DIR}/cmake/Config.cmake.in"
     "${config_file}" INSTALL_DESTINATION ${cmake_files_install_dir})
   install(FILES ${version_file} ${config_file}
     COMPONENT "${PROJECT_NAME}"
     DESTINATION ${cmake_files_install_dir})
-  endif() # XP_NAMESPACE
+  endif() # CMAKE_OPT_INSTALL
 endif()
 
 # Where Google Test's .h files can be found.
@@ -175,6 +163,20 @@ target_link_libraries(gtest_main PUBLIC gtest)
 ########################################################################
 #
 # Install rules.
+if(COMMAND xpExternPackage)
+  set(libs gtest gtest_main)
+  if(BUILD_GMOCK)
+    list(APPEND libs gmock gmock_main)
+  endif()
+  xpExternPackage(REPO_NAME googletest TARGETS_FILE ${targets_export_name}
+    CREATE_ALIASES ALIAS_NAMESPACE ${cmake_package_name} PKG_CMAKE_USEXT
+    LIBRARIES ${libs} DEFAULT_TARGETS gtest_main
+    BASE v${GOOGLETEST_VERSION} XPDIFF "patch"
+    WEB "https://google.github.io/googletest/" UPSTREAM "github.com/google/googletest"
+    DESC "GoogleTest - Google Testing and Mocking Framework"
+    LICENSE "[BSD-3-Clause](https://github.com/google/googletest/blob/master/LICENSE 'BSD 3-Clause New or Revised License')"
+    )
+endif()
 install_project(gtest gtest_main)
 
 ########################################################################
