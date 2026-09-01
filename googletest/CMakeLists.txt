@@ -169,7 +169,7 @@ if(COMMAND xpExternPackage)
     list(APPEND libs gmock gmock_main)
   endif()
   xpExternPackage(REPO_NAME googletest TARGETS_FILE ${targets_export_name}
-    CREATE_ALIASES ALIAS_NAMESPACE ${cmake_package_name} PKG_CMAKE_USEXT
+    ALIAS_NAMESPACE ${cmake_package_name}
     LIBRARIES ${libs} DEFAULT_TARGETS gtest_main
     BASE v${GOOGLETEST_VERSION} XPDIFF "patch"
     WEB "https://google.github.io/googletest/" UPSTREAM "github.com/google/googletest"
